@@ -38,8 +38,8 @@ import {
  usePollingStations,
  getUniqueConstituencies,
  getUniqueWards,
-} from "@/hooks/use-polling-stations";
-import { useBoundaries } from "@/hooks/use-boundaries";
+} from "@/hooks/use-polling-stations-supabase";
+import { useBoundaries } from "@/hooks/use-boundaries-supabase";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Dynamically import map component to avoid SSR issues with Leaflet
@@ -65,40 +65,46 @@ export default function FindCentersPage() {
   lat: number;
   lng: number;
  } | null>(null);
- const [selectedConstituency, setSelectedConstituency] = useState<string>("");
- const [selectedWard, setSelectedWard] = useState<string>("");
- const [detectedConstituency, setDetectedConstituency] = useState<string>("");
+ const [selectedConstituency, setSelectedConstituency] = useState<string>("all");
+ const [selectedWard, setSelectedWard] = useState<string>("all");
 
- // Fetch polling stations from Firestore
+ // Fetch polling stations from Supabase + PostGIS
  const {
   stations: allStations,
   loading: loadingStations,
   error: stationsError,
  } = usePollingStations({
   userLocation,
-  maxDistance: 50,
+  maxDistance: 50000, // 50km
   maxResults: 1000,
+  constituency: selectedConstituency !== "all" ? selectedConstituency : undefined,
+  ward: selectedWard !== "all" ? selectedWard : undefined,
+  searchQuery: search,
  });
 
  // Fetch boundaries for constituency/ward detection
  const {
-  detectConstituency,
+  detectedConstituency,
   loading: loadingBoundaries,
+  detectLocation,
  } = useBoundaries();
 
  // Detect constituency when user location changes
  useEffect(() => {
-  if (userLocation && detectConstituency) {
-   const constituency = detectConstituency(userLocation);
-   if (constituency) {
-    setDetectedConstituency(constituency.name);
-    toast({
-     title: "Location detected",
-     description: `You are in ${constituency.name} constituency`,
-    });
-   }
+  if (userLocation) {
+   detectLocation(userLocation);
   }
- }, [userLocation, detectConstituency]);
+ }, [userLocation, detectLocation]);
+
+ // Show toast when constituency is detected
+ useEffect(() => {
+  if (detectedConstituency) {
+   toast({
+    title: "Location detected",
+    description: `You are in ${detectedConstituency.name} constituency`,
+   });
+  }
+ }, [detectedConstituency, toast]);
 
  // Get unique constituencies and wards for filter dropdowns
  const constituencies = useMemo(
@@ -109,35 +115,6 @@ export default function FindCentersPage() {
   () => getUniqueWards(allStations, selectedConstituency),
   [allStations, selectedConstituency],
  );
-
- // Filter stations based on search and selected filters
- const filteredCenters = useMemo(() => {
-  let filtered = allStations;
-
-  // Filter by search
-  if (search) {
-   filtered = filtered.filter(
-    (center) =>
-     center.name.toLowerCase().includes(search.toLowerCase()) ||
-     center.constituency.toLowerCase().includes(search.toLowerCase()) ||
-     center.ward.toLowerCase().includes(search.toLowerCase()),
-   );
-  }
-
-  // Filter by selected constituency
-  if (selectedConstituency) {
-   filtered = filtered.filter(
-    (center) => center.constituency === selectedConstituency,
-   );
-  }
-
-  // Filter by selected ward
-  if (selectedWard) {
-   filtered = filtered.filter((center) => center.ward === selectedWard);
-  }
-
-  return filtered;
- }, [allStations, search, selectedConstituency, selectedWard]);
 
  const handleLocateUser = () => {
   if ("geolocation" in navigator) {
@@ -165,8 +142,8 @@ export default function FindCentersPage() {
  };
 
  const handleClearFilters = () => {
-  setSelectedConstituency("");
-  setSelectedWard("");
+  setSelectedConstituency("all");
+  setSelectedWard("all");
   setSearch("");
  };
 
@@ -194,7 +171,7 @@ export default function FindCentersPage() {
            Loading polling stations...
           </span>
          ) : (
-          `Showing ${filteredCenters.length} centers ${userLocation ? "near you" : "in Kenya"}`
+          `Showing ${allStations.length} centers ${userLocation ? "near you" : "in Kenya"}`
          )}
         </p>
        </div>
@@ -232,7 +209,7 @@ export default function FindCentersPage() {
         <MapIcon className="h-4 w-4" />
         <AlertDescription>
          <span className="font-semibold">Your Constituency:</span>{" "}
-         {detectedConstituency}
+         {detectedConstituency.name}
         </AlertDescription>
        </Alert>
       )}
@@ -257,13 +234,13 @@ export default function FindCentersPage() {
         </SelectContent>
        </Select>
 
-       {selectedConstituency && (
+       {selectedConstituency !== "all" && (
         <Select value={selectedWard} onValueChange={setSelectedWard}>
          <SelectTrigger className="w-[200px] h-9">
           <SelectValue placeholder="All Wards" />
          </SelectTrigger>
          <SelectContent>
-          <SelectItem value="">All Wards</SelectItem>
+          <SelectItem value="all">All Wards</SelectItem>
           {wards.map((ward) => (
            <SelectItem key={ward} value={ward}>
             {ward}
@@ -273,7 +250,7 @@ export default function FindCentersPage() {
         </Select>
        )}
 
-       {(selectedConstituency || selectedWard || search) && (
+       {(selectedConstituency !== "all" || selectedWard !== "all" || search) && (
         <Button
          variant="ghost"
          size="sm"
@@ -284,20 +261,20 @@ export default function FindCentersPage() {
         </Button>
        )}
 
-       {(selectedConstituency || selectedWard) && (
+       {(selectedConstituency !== "all" || selectedWard !== "all") && (
         <div className="flex gap-1 ml-auto">
-         {selectedConstituency && (
+         {selectedConstituency !== "all" && (
           <Badge variant="secondary" className="gap-1">
            {selectedConstituency}
-           <button onClick={() => setSelectedConstituency("")}>
+           <button onClick={() => setSelectedConstituency("all")}>
             <X className="h-3 w-3" />
            </button>
           </Badge>
          )}
-         {selectedWard && (
+         {selectedWard !== "all" && (
           <Badge variant="secondary" className="gap-1">
            {selectedWard}
-           <button onClick={() => setSelectedWard("")}>
+           <button onClick={() => setSelectedWard("all")}>
             <X className="h-3 w-3" />
            </button>
           </Badge>
@@ -340,7 +317,7 @@ export default function FindCentersPage() {
 
      <TabsContent value="list" className="mt-0">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-       {filteredCenters.map((center) => (
+       {allStations.map((center) => (
         <VoterCenterCard
          key={center.id}
          center={center}
@@ -351,7 +328,7 @@ export default function FindCentersPage() {
          }}
         />
        ))}
-       {filteredCenters.length === 0 && (
+       {allStations.length === 0 && !isLoading && (
         <div className="col-span-full py-20 text-center">
          <p className="text-muted-foreground">
           No centers found matching your search. Try another location.
@@ -364,7 +341,7 @@ export default function FindCentersPage() {
      <TabsContent value="map" className="mt-0">
       <div className="h-[600px] w-full relative">
        <InteractiveMap
-        centers={filteredCenters}
+        centers={allStations}
         onSelectCenter={setSelectedCenter}
         userLocation={userLocation}
        />
@@ -445,7 +422,7 @@ export default function FindCentersPage() {
       </SheetDescription>
      </SheetHeader>
 
-     <RouteGuide centers={filteredCenters} />
+     <RouteGuide centers={allStations} />
     </SheetContent>
    </Sheet>
   </div>

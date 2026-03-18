@@ -47,7 +47,7 @@ export function useBoundaries(): UseBoundariesResult {
         .rpc('detect_constituency', {
           user_lat: location.lat,
           user_lng: location.lng
-        });
+        }) as any;
 
       if (constituencyError) {
         console.error('Error detecting constituency:', constituencyError);
@@ -60,7 +60,7 @@ export function useBoundaries(): UseBoundariesResult {
         .rpc('detect_ward', {
           user_lat: location.lat,
           user_lng: location.lng
-        });
+        }) as any;
 
       if (wardError) {
         console.error('Error detecting ward:', wardError);
