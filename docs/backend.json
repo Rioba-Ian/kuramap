@@ -1,0 +1,237 @@
+{
+  "entities": {
+    "PollingStation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PollingStation",
+      "type": "object",
+      "description": "Represents a specific location in Kenya where citizens can register to vote or cast their ballot. This entity captures the geographical and descriptive details of such centers.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PollingStation entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the polling or voter registration center."
+        },
+        "latitude": {
+          "type": "number",
+          "description": "The geographical latitude coordinate of the center."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "The geographical longitude coordinate of the center."
+        },
+        "address": {
+          "type": "string",
+          "description": "The physical address or a descriptive location of the polling station, if available."
+        },
+        "operatingHours": {
+          "type": "string",
+          "description": "A description of the operating hours for voter registration or polling activities at this center."
+        },
+        "type": {
+          "type": "string",
+          "description": "Indicates the primary function of the center, e.g., 'registration', 'polling', or 'both'."
+        },
+        "constituencyId": {
+          "type": "string",
+          "description": "Reference to the Constituency entity to which this polling station belongs. (Relationship: Constituency 1:N PollingStation)"
+        },
+        "wardId": {
+          "type": "string",
+          "description": "Reference to the Ward entity to which this polling station belongs. (Relationship: Ward 1:N PollingStation)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "latitude",
+        "longitude",
+        "constituencyId",
+        "wardId",
+        "type"
+      ]
+    },
+    "Constituency": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Constituency",
+      "type": "object",
+      "description": "Represents an administrative electoral subdivision in Kenya, often defined by a geographical polygon.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Constituency entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the constituency."
+        },
+        "geoJsonBoundary": {
+          "type": "string",
+          "description": "A GeoJSON string representing the polygonal boundary of the constituency, used for spatial queries and map display."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "geoJsonBoundary"
+      ]
+    },
+    "Ward": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Ward",
+      "type": "object",
+      "description": "Represents a smaller administrative electoral subdivision within a Constituency in Kenya, defined by a geographical polygon.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Ward entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the ward."
+        },
+        "constituencyId": {
+          "type": "string",
+          "description": "Reference to the Constituency entity to which this ward belongs. (Relationship: Constituency 1:N Ward)"
+        },
+        "geoJsonBoundary": {
+          "type": "string",
+          "description": "A GeoJSON string representing the polygonal boundary of the ward, used for spatial queries and map display."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "constituencyId",
+        "geoJsonBoundary"
+      ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Captures user-submitted feedback, comments, or ratings about a specific Polling Station, including issues and experiences.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Review entity."
+        },
+        "pollingStationId": {
+          "type": "string",
+          "description": "Reference to the PollingStation entity that this review is for. (Relationship: PollingStation 1:N Review)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Identifier for the user who submitted the review, referencing an external authentication system. This field is optional and may be anonymous."
+        },
+        "rating": {
+          "type": "number",
+          "description": "An optional numerical rating given by the user, typically on a scale (e.g., 1-5)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The textual feedback or comment provided by the user about their experience at the polling station."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The date and time when the review was submitted.",
+          "format": "date-time"
+        },
+        "issueFlags": {
+          "type": "array",
+          "description": "An array of strings indicating specific issues or positive feedback reported by the user, e.g., 'long queues', 'helpful staff', 'closed'.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "pollingStationId",
+        "comment",
+        "timestamp"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/pollingStations/{pollingStationId}",
+        "definition": {
+          "entityName": "PollingStation",
+          "schema": {
+            "$ref": "#/backend/entities/PollingStation"
+          },
+          "description": "Collection storing details for each voter registration and polling center. Includes denormalized 'constituencyId' and 'wardId' for efficient filtering, and 'geohash' for proximity queries. Publicly readable.",
+          "params": [
+            {
+              "name": "pollingStationId",
+              "description": "Unique identifier for a specific polling or registration station."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/constituencies/{constituencyId}",
+        "definition": {
+          "entityName": "Constituency",
+          "schema": {
+            "$ref": "#/backend/entities/Constituency"
+          },
+          "description": "Collection storing details and GeoJSON polygonal boundaries for each electoral constituency. Publicly readable.",
+          "params": [
+            {
+              "name": "constituencyId",
+              "description": "Unique identifier for a specific electoral constituency."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/wards/{wardId}",
+        "definition": {
+          "entityName": "Ward",
+          "schema": {
+            "$ref": "#/backend/entities/Ward"
+          },
+          "description": "Collection storing details and GeoJSON polygonal boundaries for each electoral ward. Includes 'constituencyId' for filtering. Publicly readable.",
+          "params": [
+            {
+              "name": "wardId",
+              "description": "Unique identifier for a specific electoral ward."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/pollingStations/{pollingStationId}/reviews/{reviewId}",
+        "definition": {
+          "entityName": "Review",
+          "schema": {
+            "$ref": "#/backend/entities/Review"
+          },
+          "description": "Subcollection storing user-submitted reviews for a specific polling station. Includes denormalized 'pollingStationId' (implicit by path) and 'userId' for authorization independence. Publicly readable, but writeable only by the review's creator.",
+          "params": [
+            {
+              "name": "pollingStationId",
+              "description": "Unique identifier of the parent polling station."
+            },
+            {
+              "name": "reviewId",
+              "description": "Unique identifier for a specific review."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for Mwanzo Vote Locator prioritizes public read access for core geographical data while securing user-generated content. Polling stations, constituencies, and wards are stored in top-level collections: `/pollingStations`, `/constituencies`, and `/wards`. This structural segregation ensures that all documents within these collections share the same security posture (public read-only), simplifying security rules and enabling efficient querying of location-based data.\n\nTo achieve **Authorization Independence**, particularly for user-generated `Reviews`, each `Review` document is placed in a subcollection (`/pollingStations/{pollingStationId}/reviews/{reviewId}`) and explicitly includes the `userId` of the creator. This denormalizes the ownership information directly into the document itself. Consequently, Firestore security rules can check `request.auth.uid == resource.data.userId` directly for write operations without needing expensive or non-atomic `get()` calls to a parent `PollingStation` document or a separate user profile collection. This design ensures that creating, updating, or deleting a review can be an atomic operation, significantly improving reliability and debuggability.\n\n**QAPs (Rules are not Filters)** are supported across the design:\n*   **Public Data (`/pollingStations`, `/constituencies`, `/wards`):** These collections are designed for unrestricted public read access. Security rules will simply allow all read operations. The application layer is responsible for client-side filtering (e.g., by distance, constituency, ward, or using geohash for proximity queries if implemented). This clearly separates access control from data filtering, making rules straightforward and efficient.\n*   **Reviews (`/pollingStations/{pollingStationId}/reviews`):** All reviews within a station's subcollection are publicly readable. The path itself effectively filters reviews by `pollingStationId`. For write operations (create, update, delete), rules will enforce that `request.auth.uid` matches the `userId` stored within the `Review` document. This means users can only modify their own reviews, while anyone can read them. No complex rule-based filtering is required for listing reviews for a given station."
+  }
+}

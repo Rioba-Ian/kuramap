@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * MWANZO VOTE LOCATOR - SECURITY RULES CONFIGURATION
+     *
+     * Core Philosophy:
+     * This ruleset implements a public-access model for electoral geography and a 
+     * user-ownership model for community feedback. Official data (stations, wards, 
+     * constituencies) is globally readable but immutable by users. User reviews are 
+     * publicly viewable but strictly protected by individual ownership.
+     *
+     * Data Structure:
+     * - /pollingStations/{id}: Details on registration/polling centers (Public).
+     * - /constituencies/{id}: Administrative boundaries (Public).
+     * - /wards/{id}: Local administrative boundaries (Public).
+     * - /pollingStations/{id}/reviews/{id}: User feedback subcollection (Public Read, Owner Write).
+     *
+     * Key Security Decisions:
+     * - Public Read Access: All core electoral data is readable by anyone to support 
+     *   unauthenticated map usage.
+     * - Denormalization for Authorization: Reviews explicitly store the 'userId' 
+     *   to allow for direct ownership checks without cross-document lookups.
+     * - Relational Integrity: On review creation, the rules enforce that the 
+     *   internal 'userId' and 'pollingStationId' match the authenticated user 
+     *   and the document path respectively.
+     */
+
+    // --- Helper Functions ---
+
+    /** Checks if the user is authenticated with Firebase Auth. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the provided UID matches the authenticated user's UID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** 
+     * Verifies that the existing document belongs to the user before modification. 
+     * Combines ownership check with a check for document existence.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Public directory of all Kenyan polling and registration centers.
+     * @path /pollingStations/{pollingStationId}
+     * @allow (get, list) for any user.
+     * @deny (create, update, delete) for any user; managed via admin or backend scripts.
+     * @principle Public consumption of official data with strict immutability.
+     */
+    match /pollingStations/{pollingStationId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+
+      /**
+       * @description User-submitted feedback for a specific polling station.
+       * @path /pollingStations/{pollingStationId}/reviews/{reviewId}
+       * @allow (create) if signed in and setting their own userId.
+       * @allow (update, delete) if the user is the original creator.
+       * @deny (write) if trying to impersonate another user or modify someone else's review.
+       * @principle Enforces individual ownership for user-generated content.
+       */
+      match /reviews/{reviewId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() 
+          && request.resource.data.userId == request.auth.uid 
+          && request.resource.data.pollingStationId == pollingStationId;
+        allow update: if isExistingOwner(resource.data.userId) 
+          && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(resource.data.userId);
+      }
+    }
+
+    /**
+     * @description Electoral constituency boundaries (GeoJSON) for map visualization.
+     * @path /constituencies/{constituencyId}
+     * @allow (get, list) for any user.
+     * @deny (write) for all; read-only official data.
+     * @principle Provides public access to administrative geometry.
+     */
+    match /constituencies/{constituencyId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Electoral ward boundaries (GeoJSON) for localized map display.
+     * @path /wards/{wardId}
+     * @allow (get, list) for any user.
+     * @deny (write) for all; read-only official data.
+     * @principle Provides public access to granular administrative geometry.
+     */
+    match /wards/{wardId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+  }
+}
