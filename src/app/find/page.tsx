@@ -422,7 +422,7 @@ export default function FindCentersPage() {
       </SheetDescription>
      </SheetHeader>
 
-     <RouteGuide centers={allStations} />
+     <RouteGuide centers={allStations} selectedCenter={selectedCenter} />
     </SheetContent>
    </Sheet>
   </div>

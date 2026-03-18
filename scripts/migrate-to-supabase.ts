@@ -108,8 +108,8 @@ async function uploadPollingStations(filePath: string) {
     name: props.name || props.station_name || "Unknown Station",
     address:
      props.address ||
-     `${props.ward || "Unknown"} Ward, ${props.constituency || "Unknown"}`,
-    constituency: props.constituency || "Unknown",
+     `${props.ward || "Unknown"} Ward, ${props.constituen?.trim() || props.constituency || "Unknown"}`,
+    constituency: props.constituen?.trim() || props.constituency || "Unknown",
     ward: props.ward || "Unknown",
     station_code: props.station_code || props.code || null,
     location: `POINT(${lng} ${lat})`,
@@ -160,12 +160,13 @@ async function uploadConstituencies(filePath: string) {
 
    return {
     id:
+     props.CONST_CODE?.toString() ||
      props.code ||
      props.id ||
-     props.name?.toLowerCase().replace(/\s+/g, "-") ||
+     props.CONSTITUEN?.toLowerCase().replace(/\s+/g, "-") ||
      `constituency_${i + idx}`,
-    name: props.name || props.constituency || "Unknown",
-    code: props.code || null,
+    name: props.CONSTITUEN || props.name || props.constituency || "Unknown",
+    code: props.CONST_CODE?.toString() || props.code || null,
     boundary: wkt,
     metadata: props,
    };
@@ -210,13 +211,21 @@ async function uploadWards(filePath: string) {
 
    return {
     id:
+     props.CONST_CODE?.toString() +
+      "_" +
+      props.NAME?.toLowerCase().replace(/\s+/g, "-") ||
      props.code ||
      props.id ||
-     props.name?.toLowerCase().replace(/\s+/g, "-") ||
+     props.NAME?.toLowerCase().replace(/\s+/g, "-") ||
      `ward_${i + idx}`,
-    name: props.name || props.ward || "Unknown",
-    constituency_id: props.constituency_code || props.constituency_id || null,
-    constituency_name: props.constituency || props.constituency_name || null,
+    name: props.NAME || props.name || props.ward || "Unknown",
+    constituency_id:
+     props.CONST_CODE?.toString() ||
+     props.constituency_code ||
+     props.constituency_id ||
+     null,
+    constituency_name:
+     props.CONSTITUEN || props.constituency || props.constituency_name || null,
     code: props.code || null,
     boundary: wkt,
     metadata: props,
@@ -275,11 +284,11 @@ async function main() {
   }
 
   // Upload polling stations
-  // if (fs.existsSync(files.pollingStations)) {
-  //  await uploadPollingStations(files.pollingStations);
-  // } else {
-  //  console.log("⚠️  Skipping polling stations (file not found)");
-  // }
+  if (fs.existsSync(files.pollingStations)) {
+   await uploadPollingStations(files.pollingStations);
+  } else {
+   console.log("⚠️  Skipping polling stations (file not found)");
+  }
 
   // Upload constituencies
   if (fs.existsSync(files.constituencies)) {
