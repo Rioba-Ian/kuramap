@@ -3,49 +3,51 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "leaflet/dist/leaflet.css";
+
 @layer base {
   :root {
-    --background: 250 25% 96%;
-    --foreground: 258 60% 10%;
+    --background: 44 67% 96%; /* F2E3BB Lightened */
+    --foreground: 121 100% 5%;
     --card: 0 0% 100%;
-    --card-foreground: 258 60% 10%;
+    --card-foreground: 121 100% 5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 258 60% 10%;
-    --primary: 258 60% 44%;
+    --popover-foreground: 121 100% 5%;
+    --primary: 121 100% 19%; /* 005F02 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 213 90% 63%;
+    --secondary: 53 35% 62%; /* C0B87A */
     --secondary-foreground: 0 0% 100%;
-    --muted: 250 10% 90%;
-    --muted-foreground: 258 20% 40%;
-    --accent: 213 90% 63%;
+    --muted: 44 30% 90%;
+    --muted-foreground: 121 20% 30%;
+    --accent: 121 30% 37%; /* 427A43 */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 258 20% 90%;
-    --input: 258 20% 90%;
-    --ring: 258 60% 44%;
+    --border: 121 20% 90%;
+    --input: 121 20% 90%;
+    --ring: 121 100% 19%;
     --radius: 0.75rem;
   }
   .dark {
-    --background: 258 60% 5%;
-    --foreground: 250 25% 96%;
-    --card: 258 60% 8%;
-    --card-foreground: 250 25% 96%;
-    --popover: 258 60% 8%;
-    --popover-foreground: 250 25% 96%;
-    --primary: 258 60% 60%;
-    --primary-foreground: 258 60% 10%;
-    --secondary: 213 90% 70%;
-    --secondary-foreground: 258 60% 10%;
-    --muted: 258 30% 20%;
-    --muted-foreground: 258 20% 70%;
-    --accent: 213 90% 70%;
-    --accent-foreground: 258 60% 10%;
+    --background: 121 100% 5%;
+    --foreground: 44 67% 96%;
+    --card: 121 100% 7%;
+    --card-foreground: 44 67% 96%;
+    --popover: 121 100% 7%;
+    --popover-foreground: 44 67% 96%;
+    --primary: 121 100% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 53 35% 40%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 121 30% 15%;
+    --muted-foreground: 44 20% 70%;
+    --accent: 121 30% 50%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 258 30% 20%;
-    --input: 258 30% 20%;
-    --ring: 258 60% 60%;
+    --border: 121 30% 20%;
+    --input: 121 30% 20%;
+    --ring: 121 100% 30%;
   }
 }
 
@@ -56,4 +58,11 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Leaflet container height fix */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }

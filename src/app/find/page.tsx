@@ -1,22 +1,35 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { REGISTRATION_CENTERS, RegistrationCenter } from "@/lib/data";
 import { VoterCenterCard } from "@/components/VoterCenterCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Map as MapIcon, List, Navigation, X } from "lucide-react";
+import { Search, Map as MapIcon, List, Navigation, X, LocateFixed } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ReviewSummary } from "@/components/ReviewSummary";
 import { RouteGuide } from "@/components/RouteGuide";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+
+// Dynamically import map component to avoid SSR issues with Leaflet
+const InteractiveMap = dynamic(
+  () => import("@/components/InteractiveMap").then((mod) => mod.InteractiveMap),
+  { ssr: false, loading: () => (
+    <div className="h-[600px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center">
+      <MapIcon className="h-12 w-12 text-primary/20" />
+    </div>
+  )}
+);
 
 export default function FindCentersPage() {
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [selectedCenter, setSelectedCenter] = useState<RegistrationCenter | null>(null);
   const [showRouteTool, setShowRouteTool] = useState(false);
-  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const filteredCenters = useMemo(() => {
     return REGISTRATION_CENTERS.filter(center => 
@@ -25,6 +38,40 @@ export default function FindCentersPage() {
       center.ward.toLowerCase().includes(search.toLowerCase())
     );
   }, [search]);
+
+  const handleLocateUser = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          toast({
+            title: "Location detected",
+            description: "Showing registration centers near you.",
+          });
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          toast({
+            variant: "destructive",
+            title: "Location access denied",
+            description: "Please enable location services or search manually.",
+          });
+        }
+      );
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Not supported",
+        description: "Your browser does not support geolocation.",
+      });
+    }
+  };
+
+  // Auto-locate on mount
+  useEffect(() => {
+    handleLocateUser();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -35,22 +82,27 @@ export default function FindCentersPage() {
               <h1 className="text-2xl font-headline font-bold text-primary">Find a Registration Center</h1>
               <p className="text-sm text-muted-foreground">Showing {filteredCenters.length} centers near you</p>
             </div>
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search constituency or ward..." 
-                className="pl-9 bg-background"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && (
-                <button 
-                  onClick={() => setSearch("")}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-primary"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+            <div className="flex flex-col sm:flex-row gap-2 w-full max-w-xl">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search constituency or ward..." 
+                  className="pl-9 bg-background"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search && (
+                  <button 
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-primary"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Button variant="outline" onClick={handleLocateUser} className="gap-2 shrink-0">
+                <LocateFixed className="h-4 w-4" /> Near Me
+              </Button>
             </div>
           </div>
         </div>
@@ -60,8 +112,8 @@ export default function FindCentersPage() {
         <Tabs defaultValue="list" className="w-full">
           <div className="flex justify-between items-center mb-6">
             <TabsList className="bg-white border">
-              <TabsTrigger value="list" className="gap-2"><List className="h-4 w-4" /> List</TabsTrigger>
-              <TabsTrigger value="map" className="gap-2"><MapIcon className="h-4 w-4" /> Map</TabsTrigger>
+              <TabsTrigger value="list" className="gap-2"><List className="h-4 w-4" /> List View</TabsTrigger>
+              <TabsTrigger value="map" className="gap-2"><MapIcon className="h-4 w-4" /> Interactive Map</TabsTrigger>
             </TabsList>
             <Button 
               variant="secondary" 
@@ -94,37 +146,12 @@ export default function FindCentersPage() {
           </TabsContent>
 
           <TabsContent value="map" className="mt-0">
-            <div className="h-[600px] w-full bg-muted rounded-3xl border-2 border-white shadow-inner flex items-center justify-center relative overflow-hidden">
-              {/* Mock Map Background */}
-              <div className="absolute inset-0 opacity-40">
-                <div className="grid grid-cols-12 h-full">
-                  {Array.from({length: 144}).map((_, i) => (
-                    <div key={i} className="border border-primary/5"></div>
-                  ))}
-                </div>
-              </div>
-              <div className="relative z-10 text-center px-4">
-                <MapIcon className="h-12 w-12 text-primary/20 mx-auto mb-4" />
-                <p className="text-muted-foreground font-medium">Interactive Map Implementation</p>
-                <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto mt-2">
-                  Visualize {filteredCenters.length} pins for your search results. In a full production environment, this integrates with Google Maps or Mapbox.
-                </p>
-              </div>
-              
-              {/* Fake pins */}
-              {filteredCenters.map((center, i) => (
-                <button
-                  key={center.id}
-                  className="absolute p-2 bg-primary text-white rounded-full shadow-lg transform hover:scale-125 transition-transform"
-                  style={{
-                    top: `${20 + (i * 15) % 60}%`,
-                    left: `${20 + (i * 17) % 60}%`
-                  }}
-                  onClick={() => setSelectedCenter(center)}
-                >
-                  <MapPin size={20} />
-                </button>
-              ))}
+            <div className="h-[600px] w-full relative">
+              <InteractiveMap 
+                centers={filteredCenters} 
+                onSelectCenter={setSelectedCenter} 
+                userLocation={userLocation}
+              />
             </div>
           </TabsContent>
         </Tabs>
@@ -147,7 +174,7 @@ export default function FindCentersPage() {
               <SheetHeader>
                 <SheetTitle className="text-2xl font-headline text-primary">{selectedCenter.name}</SheetTitle>
                 <SheetDescription className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" /> {selectedCenter.address}
+                  <MapIcon className="h-4 w-4" /> {selectedCenter.address}
                 </SheetDescription>
               </SheetHeader>
 
@@ -191,24 +218,5 @@ export default function FindCentersPage() {
         </SheetContent>
       </Sheet>
     </div>
-  );
-}
-
-function MapPin({size}: {size: number}) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-      <circle cx="12" cy="10" r="3"/>
-    </svg>
   );
 }
