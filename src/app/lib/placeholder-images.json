@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-voter",
+      "description": "Kenyans queuing to register as voters",
+      "imageUrl": "https://picsum.photos/seed/kenya-vote/1200/600",
+      "imageHint": "kenya voter registration"
+    },
+    {
+      "id": "iebc-office",
+      "description": "IEBC Registration Center office",
+      "imageUrl": "https://picsum.photos/seed/office-vote/600/400",
+      "imageHint": "government office"
+    }
+  ]
+}
