@@ -130,7 +130,7 @@ const optimalRegistrationCenterRecommendationPrompt = ai.definePrompt({
   tools: [getTravelTimeAndRoute],
   prompt: `You are an AI assistant specialized in recommending the most accessible or convenient voter registration centers.
 Your task is to analyze the user's current location, their preferred mode of transport, and a list of available registration centers.
-For each registration center, you MUST use the `getTravelTimeAndRoute` tool to estimate the travel time and get a route description from the user's location to the center, using their preferred transport.
+For each registration center, you MUST use the 'getTravelTimeAndRoute' tool to estimate the travel time and get a route description from the user's location to the center, using their preferred transport.
 After evaluating all provided centers using the tool, recommend ONE registration center that is the most accessible or convenient based on estimated travel time and any other relevant factors from the route description.
 
 User's current location: {{{userLocation}}}
