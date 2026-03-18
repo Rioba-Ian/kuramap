@@ -3,8 +3,10 @@
 
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import { RegistrationCenter } from "@/lib/data";
+import { formatDistance } from "@/lib/geospatial";
 
 // Fix for default Leaflet marker icons in Next.js
 const DefaultIcon = L.icon({
@@ -60,7 +62,7 @@ export function InteractiveMap({ centers, onSelectCenter, userLocation }: Intera
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         <MapUpdater center={userLocation} />
 
         {userLocation && (
@@ -71,28 +73,49 @@ export function InteractiveMap({ centers, onSelectCenter, userLocation }: Intera
           </Marker>
         )}
 
-        {centers.map((center) => (
-          <Marker
-            key={center.id}
-            position={[center.coordinates.lat, center.coordinates.lng]}
-            eventHandlers={{
-              click: () => onSelectCenter?.(center),
-            }}
-          >
-            <Popup>
-              <div className="p-1">
-                <h4 className="font-bold text-primary">{center.name}</h4>
-                <p className="text-xs text-muted-foreground">{center.address}</p>
-                <button 
-                  className="mt-2 text-xs font-bold text-secondary hover:underline"
-                  onClick={() => onSelectCenter?.(center)}
-                >
-                  View Details
-                </button>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        <MarkerClusterGroup
+          chunkedLoading
+          maxClusterRadius={50}
+          spiderfyOnMaxZoom={true}
+          showCoverageOnHover={false}
+          zoomToBoundsOnClick={true}
+        >
+          {centers.map((center) => {
+            // Check if center has distance property (added by sortByDistance)
+            const distance = (center as any).distance;
+
+            return (
+              <Marker
+                key={center.id}
+                position={[center.coordinates.lat, center.coordinates.lng]}
+                eventHandlers={{
+                  click: () => onSelectCenter?.(center),
+                }}
+              >
+                <Popup>
+                  <div className="p-1">
+                    <h4 className="font-bold text-primary">{center.name}</h4>
+                    <p className="text-xs text-muted-foreground">{center.address}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {center.constituency} - {center.ward} Ward
+                    </p>
+                    {distance !== undefined && (
+                      <p className="text-xs font-semibold text-secondary mt-1">
+                        {formatDistance(distance)} away
+                      </p>
+                    )}
+                    <button
+                      className="mt-2 text-xs font-bold text-secondary hover:underline"
+                      onClick={() => onSelectCenter?.(center)}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MarkerClusterGroup>
       </MapContainer>
     </div>
   );

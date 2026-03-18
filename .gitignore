@@ -43,3 +43,13 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+# Firebase Admin SDK credentials (NEVER COMMIT!)
+service-account-key.json
+*-firebase-adminsdk-*.json
+
+# Data files (large GeoJSON files)
+/data/*.geojson
+/data/*.shp
+/data/*.dbf
+/data/*.shx
+/data/*.prj

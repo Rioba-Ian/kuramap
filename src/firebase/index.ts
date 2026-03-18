@@ -40,6 +40,11 @@ export function getSdks(firebaseApp: FirebaseApp) {
   };
 }
 
+// Initialize and export Firebase SDKs for direct use
+const { firebaseApp, auth, firestore } = initializeFirebase();
+export { firebaseApp, auth };
+export const db = firestore;
+
 export * from './provider';
 export * from './client-provider';
 export * from './firestore/use-collection';
