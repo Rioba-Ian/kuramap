@@ -2,9 +2,18 @@
 "use client";
 
 import Link from "next/link";
-import { Vote, MapPin, Info, Home } from "lucide-react";
+import { Vote, MapPin, Info, Home, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { name: "Home", href: "/", icon: Home },
@@ -14,6 +23,7 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -23,6 +33,8 @@ export function Navbar() {
             <Vote className="h-6 w-6" />
             <span>Mwanzo Vote</span>
           </Link>
+          
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <Link
@@ -38,9 +50,48 @@ export function Navbar() {
               </Link>
             ))}
           </div>
-          {/* Mobile Bottom Nav is more common in Kenyan mobile-first apps, but keeping it simple here */}
-          <div className="md:hidden flex items-center gap-4">
-             {/* Optional: Mobile menu trigger */}
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-primary">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetHeader className="text-left">
+                  <SheetTitle className="flex items-center gap-2 font-headline font-bold text-primary text-xl pb-4 border-b">
+                    <Vote className="h-6 w-6" />
+                    <span>Mwanzo Vote</span>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-8">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 text-lg font-medium rounded-xl transition-colors",
+                        pathname === item.href 
+                          ? "bg-primary/10 text-primary" 
+                          : "text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+                <div className="absolute bottom-8 left-0 w-full px-8 text-center">
+                  <p className="text-xs text-muted-foreground italic">
+                    Helping Kenyans navigate their first vote.
+                  </p>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
