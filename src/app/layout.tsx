@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Mwanzo Vote Locator',
+  title: 'Kuramap - Kenya Voter Registration Centers',
   description: 'Helping Kenyans find voter registration and polling centers with ease.',
 };
 
@@ -31,7 +31,7 @@ export default function RootLayout({
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 text-center md:text-left">
               <div className="space-y-4">
-                <h3 className="font-headline font-bold text-primary text-lg">Mwanzo Vote</h3>
+                <h3 className="font-headline font-bold text-primary text-lg">Kuramap</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Empowering every Kenyan to exercise their right to vote through technology and data transparency.
                 </p>
@@ -55,7 +55,7 @@ export default function RootLayout({
               </div>
             </div>
             <div className="pt-8 border-t text-center text-xs text-muted-foreground space-y-2">
-              <p>&copy; {new Date().getFullYear()} Mwanzo Vote Locator. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} Kuramap. All rights reserved.</p>
               <p className="font-bold text-destructive/80 italic">Not affiliated with the IEBC Kenya.</p>
             </div>
           </div>

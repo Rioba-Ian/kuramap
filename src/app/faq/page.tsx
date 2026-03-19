@@ -10,7 +10,7 @@ import { HelpCircle } from "lucide-react";
 export default function FAQPage() {
   const faqs = [
     {
-      question: "Is Mwanzo Vote Locator an official IEBC tool?",
+      question: "Is Kuramap an official IEBC tool?",
       answer: "No. This is an independent tool created to help first-time voters navigate the registration process more easily using modern AI and mapping tech."
     },
     {
@@ -43,7 +43,7 @@ export default function FAQPage() {
         </div>
         <h1 className="text-4xl font-headline font-bold text-primary mb-4">Frequently Asked Questions</h1>
         <p className="text-muted-foreground text-lg">
-          Everything you need to know about Mwanzo Vote Locator and the registration process.
+          Everything you need to know about Kuramap and the registration process.
         </p>
       </div>
 

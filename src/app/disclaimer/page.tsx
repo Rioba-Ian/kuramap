@@ -16,7 +16,7 @@ export default function DisclaimerPage() {
         </CardHeader>
         <CardContent className="space-y-6 text-muted-foreground leading-relaxed">
           <p className="text-lg font-medium text-foreground">
-            Mwanzo Vote Locator is an independent educational and utility platform.
+            Kuramap is an independent educational and utility platform.
           </p>
 
           <section className="space-y-3">

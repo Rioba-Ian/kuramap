@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
         </CardHeader>
         <CardContent className="space-y-6 text-muted-foreground leading-relaxed">
           <p>
-            Mwanzo Vote Locator is committed to protecting your privacy. In accordance with the <strong>Kenya Data Protection Act (2019)</strong>, we ensure that your personal data is handled with transparency and security.
+            Kuramap is committed to protecting your privacy. In accordance with the <strong>Kenya Data Protection Act (2019)</strong>, we ensure that your personal data is handled with transparency and security.
           </p>
 
           <section className="space-y-3">

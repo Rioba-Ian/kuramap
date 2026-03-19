@@ -31,7 +31,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-headline font-bold text-primary text-xl">
             <Vote className="h-6 w-6" />
-            <span>Mwanzo Vote</span>
+            <span>Kuramap</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -64,7 +64,7 @@ export function Navbar() {
                 <SheetHeader className="text-left">
                   <SheetTitle className="flex items-center gap-2 font-headline font-bold text-primary text-xl pb-4 border-b">
                     <Vote className="h-6 w-6" />
-                    <span>Mwanzo Vote</span>
+                    <span>Kuramap</span>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">

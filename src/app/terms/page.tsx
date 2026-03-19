@@ -18,14 +18,14 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              By accessing Mwanzo Vote Locator, you agree to be bound by these terms. This site is a community-driven tool intended to assist Kenyan citizens in exercising their right to vote.
+              By accessing Kuramap, you agree to be bound by these terms. This site is a community-driven tool intended to assist Kenyan citizens in exercising their right to vote.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">2. Non-Affiliation</h2>
             <p className="bg-destructive/10 p-4 rounded-lg text-destructive font-semibold">
-              CRITICAL NOTICE: Mwanzo Vote Locator is an independent initiative. We are NOT affiliated with, authorized by, or endorsed by the Independent Electoral and Boundaries Commission (IEBC) of Kenya.
+              CRITICAL NOTICE: Kuramap is an independent initiative. We are NOT affiliated with, authorized by, or endorsed by the Independent Electoral and Boundaries Commission (IEBC) of Kenya.
             </p>
           </section>
 
@@ -46,7 +46,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">5. Limitation of Liability</h2>
             <p>
-              Mwanzo Vote Locator is provided "as-is". We are not liable for any delays, errors, or missed registration opportunities resulting from the use of this tool.
+              Kuramap is provided "as-is". We are not liable for any delays, errors, or missed registration opportunities resulting from the use of this tool.
             </p>
           </section>
 
