@@ -1,0 +1,23 @@
+{
+  "name": "Kuramap - Kenya Voter Registration Centers",
+  "short_name": "Kuramap",
+  "description": "Find your nearest voter registration center in Kenya. Search 26,000+ polling stations by location, constituency, or ward.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#005F02",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["government", "lifestyle", "navigation", "utilities"],
+  "lang": "en-KE",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "kuramap-kenya-voter-registration"
+}
