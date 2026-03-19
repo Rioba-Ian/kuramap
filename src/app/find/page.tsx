@@ -69,6 +69,20 @@ export default function FindCentersPage() {
  const [selectedConstituency, setSelectedConstituency] = useState<string>("all");
  const [selectedWard, setSelectedWard] = useState<string>("all");
 
+ // Fetch boundaries for constituency/ward detection
+ const {
+  detectedConstituency,
+  loading: loadingBoundaries,
+  detectLocation,
+ } = useBoundaries();
+
+ // Determine effective constituency filter
+ // If user hasn't manually selected a constituency, use detected one
+ const effectiveConstituency =
+  selectedConstituency !== "all"
+   ? selectedConstituency
+   : detectedConstituency?.name;
+
  // Fetch polling stations from Supabase + PostGIS
  const {
   stations: allStations,
@@ -78,17 +92,10 @@ export default function FindCentersPage() {
   userLocation,
   maxDistance: 50000, // 50km
   maxResults: 1000,
-  constituency: selectedConstituency !== "all" ? selectedConstituency : undefined,
+  constituency: effectiveConstituency,
   ward: selectedWard !== "all" ? selectedWard : undefined,
   searchQuery: search,
  });
-
- // Fetch boundaries for constituency/ward detection
- const {
-  detectedConstituency,
-  loading: loadingBoundaries,
-  detectLocation,
- } = useBoundaries();
 
  // Detect constituency when user location changes
  useEffect(() => {
@@ -148,6 +155,9 @@ export default function FindCentersPage() {
   setSearch("");
  };
 
+ // Check if we're auto-filtering by detected constituency
+ const isAutoFiltered = selectedConstituency === "all" && detectedConstituency;
+
  // Auto-locate on mount
  useEffect(() => {
   handleLocateUser();
@@ -172,7 +182,13 @@ export default function FindCentersPage() {
            Loading polling stations...
           </span>
          ) : (
-          `Showing ${allStations.length} centers ${userLocation ? "near you" : "in Kenya"}`
+          `Showing ${allStations.length} centers ${
+           isAutoFiltered
+            ? `in ${detectedConstituency.name}`
+            : userLocation
+              ? "near you"
+              : "in Kenya"
+          }`
          )}
         </p>
        </div>
@@ -208,9 +224,26 @@ export default function FindCentersPage() {
       {detectedConstituency && (
        <Alert className="bg-primary/5 border-primary/20">
         <MapIcon className="h-4 w-4" />
-        <AlertDescription>
-         <span className="font-semibold">Your Constituency:</span>{" "}
-         {detectedConstituency.name}
+        <AlertDescription className="flex items-center justify-between gap-4">
+         <div>
+          <span className="font-semibold">Your Constituency:</span>{" "}
+          {detectedConstituency.name}
+          {isAutoFiltered && (
+           <span className="block text-xs text-muted-foreground mt-1">
+            Showing centers in your constituency only
+           </span>
+          )}
+         </div>
+         {isAutoFiltered && (
+          <Button
+           variant="outline"
+           size="sm"
+           onClick={() => setSelectedConstituency("all")}
+           className="shrink-0 text-xs h-7"
+          >
+           Show All Kenya
+          </Button>
+         )}
         </AlertDescription>
        </Alert>
       )}
