@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Vote, MapPin, Info, Home, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
@@ -29,9 +30,15 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-headline font-bold text-primary text-xl">
-            <Vote className="h-6 w-6" />
-            <span>Kuramap</span>
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="Kuramap Logo"
+              width={120}
+              height={32}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
           
           {/* Desktop Navigation */}
@@ -62,9 +69,14 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <SheetHeader className="text-left">
-                  <SheetTitle className="flex items-center gap-2 font-headline font-bold text-primary text-xl pb-4 border-b">
-                    <Vote className="h-6 w-6" />
-                    <span>Kuramap</span>
+                  <SheetTitle className="flex items-center gap-2 pb-4 border-b">
+                    <Image
+                      src="/logo.svg"
+                      alt="Kuramap Logo"
+                      width={120}
+                      height={32}
+                      className="h-8 w-auto"
+                    />
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">

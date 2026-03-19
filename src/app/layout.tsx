@@ -4,10 +4,14 @@ import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Toaster } from '@/components/ui/toaster';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Kuramap - Kenya Voter Registration Centers',
   description: 'Helping Kenyans find voter registration and polling centers with ease.',
+  icons: {
+    icon: '/logo.svg',
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +35,13 @@ export default function RootLayout({
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 text-center md:text-left">
               <div className="space-y-4">
-                <h3 className="font-headline font-bold text-primary text-lg">Kuramap</h3>
+                <Image
+                  src="/logo.svg"
+                  alt="Kuramap Logo"
+                  width={140}
+                  height={36}
+                  className="h-9 w-auto mx-auto md:mx-0"
+                />
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Empowering every Kenyan to exercise their right to vote through technology and data transparency.
                 </p>

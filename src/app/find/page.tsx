@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { ConstituencyCombobox } from "@/components/ConstituencyCombobox";
 import {
  usePollingStations,
  getUniqueConstituencies,
@@ -217,22 +218,12 @@ export default function FindCentersPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
        <span className="text-sm text-muted-foreground">Filter by:</span>
-       <Select
+       <ConstituencyCombobox
         value={selectedConstituency}
-        onValueChange={setSelectedConstituency}
-       >
-        <SelectTrigger className="w-[200px] h-9">
-         <SelectValue placeholder="All Constituencies" />
-        </SelectTrigger>
-        <SelectContent>
-         <SelectItem value="all">All Constituencies</SelectItem>
-         {constituencies.map((constituency) => (
-          <SelectItem key={constituency} value={constituency}>
-           {constituency}
-          </SelectItem>
-         ))}
-        </SelectContent>
-       </Select>
+        onChange={setSelectedConstituency}
+        constituencies={constituencies}
+        placeholder="All Constituencies"
+       />
 
        {selectedConstituency !== "all" && (
         <Select value={selectedWard} onValueChange={setSelectedWard}>
